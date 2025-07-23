@@ -15,7 +15,7 @@ class SistemaAerolinea:
 
     def verificarUsuario(self, idUsuario):
         for i, usuario in enumerate(self.__usuarios):
-            if usuario.getIdUsuario()() == idUsuario:
+            if usuario.getIdUsuario() == idUsuario:
                 return i
         return -1
 
