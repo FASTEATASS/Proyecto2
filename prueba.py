@@ -4,6 +4,9 @@ from tkinter import messagebox, ttk
 from Usuario import Usuario
 from Administrador import Administrador
 from SistemaAerolinea import SistemaAerolinea
+from Reserva import Reserva
+from Vuelo import Vuelo
+from Pasajero import Pasajero
 
 sistema = SistemaAerolinea()
 
@@ -12,6 +15,63 @@ user2 = Usuario("Juan", 122, "pass2", "juan@gmail.com")
 user3 = Usuario("Jose", 1234567, "pass", "jose@gmail.com")
 user4 = Usuario("Miguel", 51813066, "pass", "miguel@gmail.com")
 user5 = Usuario("Manuel", 211, "pass", "manuel@gmail.com")
+
+reserva1 = Reserva(
+    idReserva="RES001",
+    usuario=Usuario("Ana López", "AL123", "pass123", "ana@email.com"),  # Objeto Usuario
+    vuelo=Vuelo("AV123", "BOG", "MDE", "10:00 AM", 10, 30),           # Objeto Vuelo
+    cantSillasPref=1,
+    cantSillasEcono=0,
+    precioTotal=850000,      # 1 × $850,000 (preferencial)
+    millasRedimidas=False
+)
+
+reserva2 = Reserva(
+    idReserva="RES002",
+    usuario=Usuario("Carlos Rojas", "CR456", "pass456", "carlos@email.com"),
+    vuelo=Vuelo("AV456", "MDE", "CTG", "02:00 PM", 5, 20),
+    cantSillasPref=2,
+    cantSillasEcono=0,
+    precioTotal=1700000,     # 2 × $850,000 (preferencial)
+    millasRedimidas=True     # Millas aplicadas (descuento en pagarReserva)
+)
+
+# Añadir pasajeros
+reserva2.addPasajero(Pasajero("María González", "MG789"))
+reserva2.addPasajero(Pasajero("Pedro Sánchez", "PS012"))
+
+reserva3 = Reserva(
+    idReserva="RES003",
+    usuario=Usuario("Luisa Díaz", "LD789", "pass789", "luisa@email.com"),
+    vuelo=Vuelo("AV789", "CTG", "BOG", "06:00 PM", 15, 50),
+    cantSillasPref=0,
+    cantSillasEcono=3,
+    precioTotal=705000,      # 3 × $235,000 (económica)
+    millasRedimidas=False
+)
+
+# Añadir pasajeros (máximo permitido)
+reserva3.addPasajero(Pasajero("Juan Pérez", "JP345"))
+reserva3.addPasajero(Pasajero("Laura Ramírez", "LR678"))
+reserva3.addPasajero(Pasajero("Sofía Castro", "SC901"))
+
+reserva4 = Reserva(
+    idReserva="RES004",
+    usuario=Usuario("David Torres", "DT234", "pass234", "david@email.com"),
+    vuelo=Vuelo("AV101", "BOG", "PEI", "08:00 AM", 8, 25),
+    cantSillasPref=1,
+    cantSillasEcono=1,
+    precioTotal=1085000,     # (1 × $850,000) + (1 × $235,000)
+    millasRedimidas=False
+)
+
+# Añadir pasajeros y marcar check-in
+reserva4.addPasajero(Pasajero("Daniela Vargas", "DV567"))
+reserva4.addPasajero(Pasajero("Andrés Gómez", "AG890"))
+reserva4.setEstadoCheckIn(True)  # Check-in realizado
+######PRUEBAS
+
+sistema.
 
 sistema.registrarUsuario(user1)
 sistema.registrarUsuario(user2)
