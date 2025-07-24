@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from Usuario import Usuario
 from Administrador import Administrador
+from SistemaAerolinea import SistemaAerolinea
 
 sistema = SistemaAerolinea()
 

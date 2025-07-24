@@ -26,7 +26,7 @@ class SistemaAerolinea:
         for usuario in self.__usuarios:
             if usuario.validarCredenciales(idUsuario, contraseña):
                 return usuario
-            return None
+        return None
 
     def cambiarContraseña(self, idUsuario, contraseñaVieja, contraseñaNueva):
         for usuario in self.__usuarios:

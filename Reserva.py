@@ -9,6 +9,7 @@ class Reserva:
         self.__estadoCheckIn = False
         self.__precioTotal = precioTotal
         self.__millasRedimidas = millasRedimidas
+        self.__cantPasajeros = 0
 
     def calcularPrecio(self):
         self.__precioTotal = (self.__cantSillasPref * 850000) + (self.__cantSillasEcono * 235000)
@@ -34,7 +35,13 @@ class Reserva:
         return self.__idReserva
 
     def addPasajero(self, pasajero):
-        self.__pasajeros.append(pasajero)
+        if self.__cantPasajeros < 3:
+            self.__pasajeros.append(pasajero)
+            self.__cantPasajeros +=1
+            return True
+        else:
+            return False
+
 
     def getPasajeros(self):
         for pasajero in self.__pasajeros:
