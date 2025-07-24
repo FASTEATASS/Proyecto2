@@ -161,10 +161,10 @@ def ventana_user(usuario):
 
     def mostrar_detalle(vuelo):
         info = (
-            f"Código: {vuelo.codigo}\n"
-            f"Origen: {vuelo.origen}\n"
-            f"Destino: {vuelo.destino}\n"
-            f"Horario: {vuelo.horario}"
+            f"Código: {vuelo.get_idVuelo()}\n"
+            f"Origen: {vuelo.get_origen()}\n"
+            f"Destino: {vuelo.get_destino()}\n"
+            f"Horario: {vuelo.get_horario()}"
         )
         messagebox.showinfo("Información del vuelo", info)
 
@@ -179,7 +179,7 @@ def ventana_user(usuario):
             tk.Label(vuelos_frame, text="Por favor selecciona origen y destino.").pack()
             return
 
-        encontrados = [v for v in vuelos_disponibles if v.origen == origen and v.destino == destino]
+        encontrados = [v for v in vuelos_disponibles if v.get_origen() == origen and v.get_destino() == destino]
 
         if not encontrados:
             tk.Label(vuelos_frame, text="No hay vuelos disponibles para esa ruta.").pack()
@@ -189,11 +189,16 @@ def ventana_user(usuario):
             fila = tk.Frame(vuelos_frame)
             fila.pack(pady=5, fill="x")
 
-            desc = f"Vuelo {vuelo.codigo}: {vuelo.origen} → {vuelo.destino} "
+            desc = f"Vuelo {vuelo.get_idVuelo()}: {vuelo.get_origen()} → {vuelo.get_destino()} | Horario: {vuelo.get_horario()}"
+            ##desc = f"Vuelo {vuelo.get_idVuelo()}: {vuelo.get_origen()} → {vuelo.get_destino()}"
+
+            ##desc = f"Vuelo {vuelo.codigo}: {vuelo.origen} → {vuelo.destino} "
             tk.Label(fila, text=desc, anchor="w").pack(side="left", padx=5)
 
-            boton_comprar = tk.Button(fila, text="Comprar", command=lambda v=vuelo: mostrar_detalle(v))
-            boton_comprar.pack(side="right", padx=5)
+            boton_reserva = tk.Button(fila, text="Reservar", command=lambda v=vuelo: mostrar_detalle(v))
+            boton_reserva.pack(side="right", padx=5)
+            ##boton_comprar = tk.Button(fila, text="Comprar", command=lambda v=vuelo: mostrar_detalle(v))
+            ##boton_comprar.pack(side="right", padx=5)
 
     tk.Button(ventana, text="Buscar vuelos", command=buscar_vuelos).pack(pady=10)
 
