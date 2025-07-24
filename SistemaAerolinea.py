@@ -16,6 +16,9 @@ class SistemaAerolinea:
     def getVuelos(self):
         return self.__vuelos
 
+    def getReservas(self):
+        return self.__reservas
+
     def verificarUsuario(self, idUsuario):
         for i, usuario in enumerate(self.__usuarios):
             if usuario.getIdUsuario() == idUsuario:
@@ -53,19 +56,22 @@ class SistemaAerolinea:
 
     def toFileReservas(self, filename):
         try:
-            with open(filename, 'w', encoding='0utf-8') as file:
+            with open(filename, 'w', encoding='utf-8') as file:
                 for reserva in self.__reservas:
-                    pasajerosStr = '|'.join([p.toString() for p in reserva.getPasajeros()])
+                    pasajeros_str = "|".join(
+                        [f"{p.getNombre()},{p.getId()}" for p in reserva.getPasajeros()]
+                    )
+
                     linea = (
                         f"{reserva.getIdReserva()},"
                         f"{reserva.getUsuario().getIdUsuario()},"
                         f"{reserva.getVuelo().get_idVuelo()},"
-                        f"{reserva.getcantSillasPref()},"
-                        f"{reserva.getcantSillasEcono()},"
-                        f"{pasajerosStr},"
-                        f"{reserva.getEstadoCheckin()},"
+                        f"{reserva.getCantSillasPref()},"
+                        f"{reserva.getCantSillasEcono()},"
+                        f"{pasajeros_str},"
+                        f"{reserva.getEstadoCheckIn()},"
                         f"{reserva.getPrecioTotal()},"
-                        f"{reserva.getMillasREdimidas()}"
+                        f"{reserva.getMillasRedimidas()}"
                     )
                     file.write(linea + '\n')
             return True
@@ -73,35 +79,35 @@ class SistemaAerolinea:
             return False
 
     def importarReservas(self, filename):
+        nuevas_reservas = []
         try:
-            nuevasReservas = []
             with open(filename, 'r', encoding='utf-8') as file:
                 for linea in file:
                     datos = linea.strip().split(',')
                     if len(datos) < 9:
                         continue
-                    idReserva = datos[0]
-                    idUsuario = datos[1]
-                    idVuelo = datos[2]
-                    sillasPref = int(datos[3])
-                    sillasEcono = int(datos[4])
-
-                    pasajerosReserva = []
-                    datosPasajero = datos[5].split('|')
-                    if len(datosPasajero) == 2:
-                        p = Pasajero()
-                        p.setNombre(datosPasajero[0])
-                        p.setId(datosPasajero[1])
-                        pasajerosReserva.append(p)
-
-                    estadoCheckin = datos[6].lower() == 'true'
-                    precioTotal = float(datos[7])
-                    millasRedimidas = datos[8].lower() == 'true'
-
-                    reserva = Reserva(idReserva, idUsuario, idVuelo, sillasPref, sillasEcono, pasajerosReserva, estadoCheckin, precioTotal, millasRedimidas)
-                    nuevasReservas.append(reserva)
-                self.__reservas = nuevasReservas
-                return True
+                    try:
+                        id_reserva = datos[0]
+                        id_usuario = datos[1]
+                        id_vuelo = datos[2]
+                        usuario = next((u for u in self.__usuarios if u.getIdUsuario() == id_usuario), None)
+                        vuelo = next((v for v in self.__vuelos if v.get_idVuelo() == id_vuelo), None)
+                        reserva = Reserva(
+                            id_reserva, usuario, vuelo,
+                            int(datos[3]), int(datos[4]),
+                            float(datos[7]), datos[8].lower() == 'true'
+                        )
+                        reserva.setEstadoCheckIn(datos[6].lower() == 'true')
+                        if datos[5]:
+                            for p_str in datos[5].split(','):
+                                if '|' in p_str:
+                                    nombre, id_p = p_str.split('|')
+                                    reserva.addPasajero(Pasajero(nombre.strip(), id_p.strip()))
+                        nuevas_reservas.append(reserva)
+                    except Exception as e:
+                        continue
+            self.__reservas = nuevas_reservas
+            return True
         except Exception as e:
             return False
 

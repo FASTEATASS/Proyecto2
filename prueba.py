@@ -173,7 +173,7 @@ def ventana_user(usuario):
     def mostrar_detalle(vuelo):
         ventana_detalle = tk.Toplevel()
         ventana_detalle.title("Reserva")
-        ventana_detalle.geometry("500x600")
+        ventana_detalle.geometry("500x750")
         ventana_detalle.config(bg="white")
         fuente_general = ("Helvetica", 12)
 

@@ -45,10 +45,30 @@ class Reserva:
         else:
             return False
 
+    def getVuelo(self):
+        return self.__vuelo
+
+    def getCantSillasPref(self):
+        return self.__cantSillasPref
+
+    def getCantSillasEcono(self):
+        return self.__cantSillasEcono
 
     def getPasajeros(self):
         for pasajero in self.__pasajeros:
             print(pasajero.toString())
+
+    def getEstadoCheckIn(self):
+        return self.__estadoCheckIn
+
+    def getPrecioTotal(self):
+        return self.__precioTotal
+
+    def getMillasRedimidas(self):
+        return self.__millasRedimidas
+
+    def getCantPasajeros(self):
+        return self.__cantPasajeros
 
     def getUsuario(self):
         return self.__usuario
