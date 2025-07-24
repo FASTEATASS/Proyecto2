@@ -134,8 +134,8 @@ def ventana_user(usuario):
     frame_millas = tk.Frame(ventana)
     frame_millas.pack(pady=10)
 
-    tk.Label(frame_millas, text=f"Cantidad de millas acumuladas: {usuario.getMillas()}", font=("Helvetica", 10)).pack(
-        side=tk.LEFT, padx=10)
+    tk.Label(frame_millas, text=f"Cantidad de millas acumuladas: {usuario.getMillas()}",
+             font=("Helvetica", 10)).pack(side=tk.LEFT, padx=10)
 
     origenes = sorted(list(set(v.get_origen() for v in vuelos_disponibles)))
     destinos = sorted(list(set(v.get_destino() for v in vuelos_disponibles)))
@@ -150,9 +150,6 @@ def ventana_user(usuario):
     tk.Label(ventana, text="Destino:").pack()
     combo_destino = ttk.Combobox(ventana, textvariable=destino_var, values=destinos, state="readonly")
     combo_destino.pack()
-
-    # vuelos_frame = tk.Frame(ventana)
-    # vuelos_frame.pack(pady=15)
 
     canvas = tk.Canvas(ventana, height=200)  # Puedes ajustar la altura aquí
     scrollbar = tk.Scrollbar(ventana, orient="vertical", command=canvas.yview)
@@ -175,14 +172,56 @@ def ventana_user(usuario):
 
     def mostrar_detalle(vuelo):
         ventana_detalle = tk.Toplevel()
-        ventana_detalle.title("Detalle del vuelo")
-        info = (
-            f"Código: {vuelo.get_idVuelo()}\n"
-            f"Origen: {vuelo.get_origen()}\n"
-            f"Destino: {vuelo.get_destino()}\n"
-            f"Horario: {vuelo.get_horario()}"
-        )
-        tk.Label(ventana_detalle, text=info, justify="left", font=("Helvetica", 12)).pack(padx=15, pady=10)
+        ventana_detalle.title("Reserva")
+        ventana_detalle.geometry("500x600")
+        ventana_detalle.config(bg="white")
+        fuente_general = ("Helvetica", 12)
+
+        titulo = tk.Label(ventana_detalle, text="Reserva", font=("Helvetica", 20, "bold"), bg="white")
+        titulo.pack(pady=20)
+
+        frame_info = tk.Frame(ventana_detalle, bg="white")
+        frame_info.pack(pady=10)
+
+        info_labels = [
+            ("Código vuelo", vuelo.get_idVuelo()),
+            ("Origen", vuelo.get_origen()),
+            ("Destino", vuelo.get_destino()),
+            ("Horario", vuelo.get_horario()),
+            ("Cantidad de sillas preferenciales disponibles", vuelo.get_sillasPreDisp()),
+            ("Cantidad de sillas economicas dispobles", vuelo.get_sillasEconoDisp())]
+
+        for texto, valor in info_labels:
+            tk.Label(frame_info, text=texto, font=fuente_general, anchor="w", bg="white").pack(fill="x")
+            tk.Label(frame_info, text=str(valor), font=fuente_general, anchor="w", bg="white").pack(fill="x",
+                                                                                                    pady=(0, 10))
+
+        frame_seleccion = tk.Frame(ventana_detalle, bg="white")
+        frame_seleccion.pack(pady=20)
+
+        tk.Label(frame_seleccion, text="SILLAS PREFERENCIALES\n$850.000", font=fuente_general, bg="white",
+                 anchor="w").grid(row=0, column=0, sticky="w", padx=10, pady=5)
+        entry_pref = tk.Entry(frame_seleccion, width=10)
+        entry_pref.grid(row=0, column=1, padx=10)
+
+        tk.Label(frame_seleccion, text="SILLAS ECONÓMICAS\n$235.000", font=fuente_general, bg="white", anchor="w").grid(
+            row=1, column=0, sticky="w", padx=10, pady=5)
+        entry_econo = tk.Entry(frame_seleccion, width=10)
+        entry_econo.grid(row=1, column=1, padx=10)
+
+        frame_total = tk.Frame(ventana_detalle, bg="white")
+        frame_total.pack(pady=15)
+
+        tk.Label(frame_total, text="TOTAL A PAGAR:", font=fuente_general, bg="white").grid(row=0, column=0, padx=10)
+        entry_total = tk.Entry(frame_total, width=15)
+        entry_total.grid(row=0, column=1)
+
+        frame_botones = tk.Frame(ventana_detalle, bg="white")
+        frame_botones.pack(pady=20)
+
+        # tk.Button(frame_botones, text="Total", command=calcular_total, font=fuente_general, bg="black", fg="white", width=10).pack(side="left", padx=10)
+        tk.Button(frame_botones, text="Reservar", font=fuente_general, bg="black", fg="white", width=10).pack(
+            side="left", padx=10)
 
     def buscar_vuelos():
         for widget in vuelos_frame.winfo_children():
