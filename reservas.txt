@@ -1,0 +1,2 @@
+11111,12345,AV123,1,0,,False,850000,False
+2222,54321,VU1234L,2,0,María González|1789,Pedro Sánchez|1012,False,1700000,True

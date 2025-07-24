@@ -54,9 +54,12 @@ class Reserva:
     def getCantSillasEcono(self):
         return self.__cantSillasEcono
 
-    def getPasajeros(self):
+    def imprimirPasajeros(self):
         for pasajero in self.__pasajeros:
             print(pasajero.toString())
+
+    def getPasajeros(self):
+        return self.__pasajeros
 
     def getEstadoCheckIn(self):
         return self.__estadoCheckIn

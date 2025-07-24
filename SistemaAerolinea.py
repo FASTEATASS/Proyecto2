@@ -13,6 +13,18 @@ class SistemaAerolinea:
         self.__reservas = []
         self.__no_usuarios = None
 
+    def buscarUsuarioPorId(self, idUsuario):
+        for usuario in self.__usuarios:
+            if usuario.getIdUsuario() == idUsuario:
+                return usuario
+        return None
+
+    def buscarVueloPorId(self, idVuelo):
+        for vuelo in self.__vuelos:
+            if vuelo.get_idVuelo() == idVuelo:
+                return vuelo
+        return None
+
     def verificarVuelo(self, codigo):
         for i, vuelo in enumerate(self.__vuelos):
             if vuelo.get_idVuelo() == codigo:
@@ -85,10 +97,13 @@ class SistemaAerolinea:
         return v_filtrados
 
     def toFileReservas(self, filename):
+        if not self.__reservas:
+            print("⚠ No hay reservas para guardar.")
+            return False
+
         try:
             with open(filename, 'w', encoding='utf-8') as file:
                 for reserva in self.__reservas:
-                    # Formato: "Nombre|ID,Nombre2|ID2"
                     pasajeros_str = ",".join(
                         [f"{p.getNombre()}|{p.getId()}" for p in reserva.getPasajeros()]
                     )
@@ -104,57 +119,58 @@ class SistemaAerolinea:
                         f"{reserva.getMillasRedimidas()}\n"
                     )
                     file.write(linea)
+
+            print(f"✅ Reservas guardadas en {filename}")
             return True
+
         except Exception as e:
-            print(f"Error al guardar: {str(e)}")
+            print(f"❌ Error al guardar reservas: {str(e)}")
             return False
 
     def importarReservas(self, filename):
-        nuevas_reservas = []
         try:
             with open(filename, 'r', encoding='utf-8') as file:
                 for linea in file:
-                    datos = linea.strip().split(',')
-                    if len(datos) < 9:
+                    partes = linea.strip().split(",")
+                    idReserva = partes[0]
+                    idUsuario = partes[1]
+                    idVuelo = partes[2]
+                    cantPref = int(partes[3])
+                    cantEcono = int(partes[4])
+
+                    pasajeros_raw = []
+                    i = 5
+                    while not partes[i] in ['True', 'False']:  # recorre hasta llegar a estadoCheckin
+                        pasajeros_raw.append(partes[i])
+                        i += 1
+
+                    estadoCheckIn = partes[i] == "True"
+                    precioTotal = int(partes[i + 1])
+                    millasRedimidas = partes[i + 2] == "True"
+
+                    # Buscar usuario y vuelo existentes en el sistema
+                    usuario = self.buscarUsuarioPorId(idUsuario)
+                    vuelo = self.buscarVueloPorId(idVuelo)
+
+                    if usuario is None or vuelo is None:
+                        print(f"No se encontró usuario o vuelo para la reserva {idReserva}")
                         continue
 
-                    try:
-                        # Buscar usuario y vuelo
-                        usuario = next((u for u in self.__usuarios if u.getIdUsuario() == datos[1]), None)
-                        vuelo = next((v for v in self.__vuelos if v.get_idVuelo() == datos[2]), None)
-                        if not usuario or not vuelo:
-                            continue
+                    reserva = Reserva(idReserva, usuario, vuelo, cantPref, cantEcono, precioTotal, millasRedimidas)
+                    reserva.setEstadoCheckIn(estadoCheckIn)
 
-                        # Crear reserva
-                        reserva = Reserva(
-                            datos[0], usuario, vuelo,
-                            int(datos[3]), int(datos[4]),  # sillas_pref, sillas_econo
-                            float(datos[7]),  # precio_total
-                            datos[8].lower() == 'true'  # millas_redimidas
-                        )
-                        reserva.setEstadoCheckIn(datos[6].lower() == 'true')
+                    for pasajero_str in pasajeros_raw:
+                        if "|" in pasajero_str:
+                            nombre, idPasajero = pasajero_str.split("|")
+                            reserva.addPasajero(Pasajero(nombre, idPasajero))
 
-                        # Añadir pasajeros (formato: "Nombre|ID,Nombre2|ID2")
-                        if datos[5]:
-                            for p_str in datos[5].split(','):
-                                nombre, id_p = p_str.split('|')
-                                reserva.addPasajero(Pasajero(nombre.strip(), id_p.strip()))
+                    self.addReserva(reserva)
 
-                        nuevas_reservas.append(reserva)
-
-                    except (ValueError, AttributeError) as e:
-                        print(f"Error en línea: {linea} - {str(e)}")
-                        continue
-
-            self.__reservas = nuevas_reservas
-            return True
-        except FileNotFoundError:
-            print(f"Archivo no encontrado: {filename}")
-            return False
+            print("Reservas importadas correctamente.")
         except Exception as e:
-            print(f"Error inesperado: {str(e)}")
-            return False
+            print(f"Error al importar reservas: {e}")
 
+    ##No tocar
     def toFileUsuarios(self, filename):
         """
         Guarda usuarios en formato:
@@ -182,7 +198,7 @@ class SistemaAerolinea:
         except Exception as e:
             print(f"❌ Error al guardar usuarios: {e}")
             return False
-
+##No tocar
     def importarUsuarios(self, filename):
         """
         Importa usuarios desde archivo con formato:
@@ -233,6 +249,7 @@ class SistemaAerolinea:
             print(f"❌ Error crítico: {str(e)}")
             return False
 
+##No tocar
     def importarVuelos(self, filename):
         try:
             vuelos = []
@@ -253,7 +270,7 @@ class SistemaAerolinea:
             return True
         except Exception as e:
             return False
-
+##No tocar
     def toFileVuelos(self, filename):
         """
         Guarda los vuelos en formato compatible con importarVuelos:
@@ -287,65 +304,3 @@ class SistemaAerolinea:
         except Exception as e:
             print(f"Error al guardar vuelos: {str(e)}")
             return False
-
-    def importarCheckins(self, filename):
-        try:
-            nuevos_checkins = []
-
-            with open(filename, 'r', encoding='utf-8') as file:
-                for linea in file:
-                    datos = linea.strip().split(',')
-                    if len(datos) < 3:
-                        continue
-
-                    idReserva = datos[0]
-                    millas = int(datos[1])
-                    costoEquipaje = float(datos[2])
-                    maletas = []
-
-                    for maleta_str in datos[3:]:
-                        tipo, peso_str = maleta_str.split('-')
-                        peso = float(peso_str)
-
-                        if tipo == 'cabina':
-                            m = MaletaCabina(peso)
-                        elif tipo == 'bodega':
-                            m = MaletaBodega(peso)
-                        else:
-                            continue
-
-                        maletas.append(m)
-
-                    c = CheckIn(idReserva, maletas, millas, costoEquipaje)
-                    nuevos_checkins.append(c)
-            self.__checkins = nuevos_checkins
-            return True
-        except Exception as e:
-            return False
-
-    def tofileCheckins(self, filename):
-        try:
-            with open(filename, 'w', encoding='utf-8') as file:
-                for checkin in self.__checkins:
-                    idReserva = checkin.getReserva()
-                    millas = checkin.getMillas()
-                    costo = checkin.getCostoEquipaje()
-                    maletas = checkin.getMaletas()
-
-                    linea = f"{idReserva},{millas},{costo}"
-
-                    for maleta in maletas:
-                        if isinstance(maleta, MaletaCabina):
-                            tipo = "cabina"
-                        elif isinstance(maleta, MaletaBodega):
-                            tipo = "bodega"
-                        else:
-                            continue
-
-                        linea += f",{tipo}-{maleta.getPeso()}"
-
-                    file.write(linea + '\n')
-            return True
-        except Exception as e:
-            return False
-

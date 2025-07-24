@@ -10,15 +10,17 @@ from Pasajero import Pasajero
 
 sistema = SistemaAerolinea()
 
-##user1 = Usuario("Ana", 123, "pass1", "ana@gmail.com")
-##user2 = Usuario("Juan", 122, "pass2", "juan@gmail.com")
-##user3 = Usuario("Jose", 1234567, "pass", "jose@gmail.com")
-##user4 = Usuario("Miguel", 51813066, "pass", "miguel@gmail.com")
-##user5 = Usuario("Manuel", 211, "pass", "manuel@gmail.com")
+user1 = Usuario("Ana", 123, "pass1", "ana@gmail.com")
+user2 = Usuario("Juan", 122, "pass2", "juan@gmail.com")
+user3 = Usuario("Jose", 1234567, "pass", "jose@gmail.com")
+user4 = Usuario("Miguel", 51813066, "pass", "miguel@gmail.com")
+User5 = Usuario("Manuel", 211, "pass", "manuel@gmail.com")
+usuario=Usuario("Carlos", "54321", "pass456", "carlos@email.com")
 
+######PRUEBAS
 reserva1 = Reserva(
-    idReserva="RES001",
-    usuario=Usuario("Ana López", "AL123", "pass123", "ana@email.com"),  # Objeto Usuario
+    idReserva="11111",
+    usuario=Usuario("Ana López", "12345", "pass123", "ana@email.com"),  # Objeto Usuario
     vuelo=Vuelo("AV123", "BOG", "MDE", "10:00 AM", 10, 30),           # Objeto Vuelo
     cantSillasPref=1,
     cantSillasEcono=0,
@@ -27,9 +29,9 @@ reserva1 = Reserva(
 )
 
 reserva2 = Reserva(
-    idReserva="RES002",
-    usuario=Usuario("Carlos Rojas", "CR456", "pass456", "carlos@email.com"),
-    vuelo=Vuelo("AV456", "MDE", "CTG", "02:00 PM", 5, 20),
+    idReserva="2222",
+    usuario=Usuario("Carlos Rojas", "54321", "pass456", "carlos@email.com"),
+    vuelo=Vuelo("VU1234L", "MEDELLIN", "BOGOTA", "LUNES 8:00", 10, 130),
     cantSillasPref=2,
     cantSillasEcono=0,
     precioTotal=1700000,     # 2 × $850,000 (preferencial)
@@ -37,58 +39,22 @@ reserva2 = Reserva(
 )
 
 # Añadir pasajeros
-reserva2.addPasajero(Pasajero("María González", "MG789"))
-reserva2.addPasajero(Pasajero("Pedro Sánchez", "PS012"))
+reserva2.addPasajero(Pasajero("María González", "1789"))
+reserva2.addPasajero(Pasajero("Pedro Sánchez", "1012"))
 
-reserva3 = Reserva(
-    idReserva="RES003",
-    usuario=Usuario("Luisa Díaz", "LD789", "pass789", "luisa@email.com"),
-    vuelo=Vuelo("AV789", "CTG", "BOG", "06:00 PM", 15, 50),
-    cantSillasPref=0,
-    cantSillasEcono=3,
-    precioTotal=705000,      # 3 × $235,000 (económica)
-    millasRedimidas=False
-)
-
-# Añadir pasajeros (máximo permitido)
-reserva3.addPasajero(Pasajero("Juan Pérez", "JP345"))
-reserva3.addPasajero(Pasajero("Laura Ramírez", "LR678"))
-reserva3.addPasajero(Pasajero("Sofía Castro", "SC901"))
-
-reserva4 = Reserva(
-    idReserva="RES004",
-    usuario=Usuario("David Torres", "DT234", "pass234", "david@email.com"),
-    vuelo=Vuelo("AV101", "BOG", "PEI", "08:00 AM", 8, 25),
-    cantSillasPref=1,
-    cantSillasEcono=1,
-    precioTotal=1085000,     # (1 × $850,000) + (1 × $235,000)
-    millasRedimidas=False
-)
-
-# Añadir pasajeros y marcar check-in
-reserva4.addPasajero(Pasajero("Daniela Vargas", "DV567"))
-reserva4.addPasajero(Pasajero("Andrés Gómez", "AG890"))
-reserva4.setEstadoCheckIn(True)  # Check-in realizado
 sistema.addReserva(reserva1)
 sistema.addReserva(reserva2)
-sistema.addReserva(reserva3)
-sistema.addReserva(reserva4)
-
-sistema.toFileReservas("reservas.txt")
-######PRUEBAS
-
-
-
-#sistema.registrarUsuario(user1)
-#sistema.registrarUsuario(user2)
-#sistema.registrarUsuario(user3)
-#sistema.registrarUsuario(user4)
-#sistema.registrarUsuario(user5)
+sistema.registrarUsuario(user1)
+sistema.registrarUsuario(user2)
+sistema.registrarUsuario(user3)
+sistema.registrarUsuario(user4)
+sistema.registrarUsuario(usuario)
 
 sistema.importarVuelos("vuelos.txt")
 sistema.toFileVuelos("vuelos2.txt")
-
-#sistema.toFileUsuarios("usuarios.txt")
+sistema.importarReservas("reservas.txt")
+#sistema.toFileReservas("reservas.txt")
+sistema.toFileUsuarios("usuarios.txt")
 sistema.importarUsuarios("usuarios.txt")
 
 for u in sistema._SistemaAerolinea__usuarios:
@@ -436,8 +402,8 @@ def CHECKIN():
             numero_reserva = int(entry2.get())
 
             reserva_encontrada = None
-            for reserva in SistemaAerolinea.reservas:
-                if reserva.usuario.id == id_usuario and reserva.numero_reserva == numero_reserva:
+            for reserva in sistema.getReservas():
+                if reserva.getUsuario().getIdUsuario() == id_usuario and reserva.getIdReserva() == numero_reserva:
                     reserva_encontrada = reserva
                     break
 
