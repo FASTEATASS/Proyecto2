@@ -18,11 +18,10 @@ sistema.registrarUsuario(user3)
 sistema.registrarUsuario(user4)
 sistema.registrarUsuario(user5)
 
-for u in sistema._SistemaAerolinea__usuarios:
-    print(u.getNombre(), u.getIdUsuario())
-
 sistema.importarVuelos("vuelos.txt")
 
+for u in sistema._SistemaAerolinea__usuarios:
+    print(u.getNombre(), u.getIdUsuario())
 
 # Crear la ventana principal
 win = tk.Tk()
@@ -101,7 +100,7 @@ def ventana_admin(usuario):
 
     tk.Label(ventana, text=f"Bienvenido/a Administrador", font=("Helvetica", 12)).pack(pady=10)
 
-    vuelos_disponibles = SistemaAerolinea.vuelos
+    vuelos_disponibles = SistemaAerolinea.getVuelos()
 
     origenes = sorted(set(v.origen for v in vuelos_disponibles))
     destinos = sorted(set(v.destino for v in vuelos_disponibles))

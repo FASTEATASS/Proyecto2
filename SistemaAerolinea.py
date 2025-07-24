@@ -13,6 +13,9 @@ class SistemaAerolinea:
         self.__reservas = []
         self.__no_usuarios = None
 
+    def getVuelos(self):
+        return self.__vuelos
+
     def verificarUsuario(self, idUsuario):
         for i, usuario in enumerate(self.__usuarios):
             if usuario.getIdUsuario() == idUsuario:
