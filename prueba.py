@@ -100,10 +100,10 @@ def ventana_admin(usuario):
 
     tk.Label(ventana, text=f"Bienvenido/a Administrador", font=("Helvetica", 12)).pack(pady=10)
 
-    vuelos_disponibles = SistemaAerolinea.getVuelos()
+    vuelos_disponibles = sistema.getVuelos()
 
-    origenes = sorted(set(v.origen for v in vuelos_disponibles))
-    destinos = sorted(set(v.destino for v in vuelos_disponibles))
+    origenes = sorted(set(v.get_origen() for v in vuelos_disponibles))
+    destinos = sorted(set(v.get_destino() for v in vuelos_disponibles))
 
     origen_var = tk.StringVar()
     destino_var = tk.StringVar()
@@ -125,7 +125,9 @@ def ventana_user(usuario):
     ventana.title("Ingreso usuario")
     ventana.geometry("600x500")
 
-    tk.Label(ventana, text=f"Bienvenido/a {usuario.getNombre}", font=("Helvetica", 12)).pack(pady=10)
+    tk.Label(ventana, text=f"Bienvenido/a {usuario.getNombre()}", font=("Helvetica", 12)).pack(pady=10)
+
+    vuelos_disponibles = sistema.getVuelos()
 
     # Marco horizontal para millas
     frame_millas = tk.Frame(ventana)
@@ -134,8 +136,8 @@ def ventana_user(usuario):
     tk.Label(frame_millas, text=f"Cantidad de millas acumuladas: {usuario.getMillas()}", font=("Helvetica", 10)).pack(
         side=tk.LEFT, padx=10)
 
-    origenes = set(v.get_origen for v in sistema._SistemaAerolinea__vuelos)
-    destinos = set(v.get_destino for v in sistema._SistemaAerolinea__vuelos)
+    origenes = set(v.get_origen() for v in vuelos_disponibles)
+    destinos = set(v.get_destino() for v in vuelos_disponibles)
 
     origen_var = tk.StringVar()
     destino_var = tk.StringVar()
