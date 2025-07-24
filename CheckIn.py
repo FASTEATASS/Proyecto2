@@ -6,23 +6,23 @@ class CheckIn:
         self.__costoEquipaje = 0
         self.__cantMaletasBodega = 0
         self.__cantMaletasCabina = 0
+        self.__cantidadPasajeros = self.__reserva.getCantSillasEcono() + self.__reserva.getCantSillasPref()
 
     def procesar(self):
-        self.getCostoEquipaje()
-        self.__reserva.usuario.millas += 500
+        self.getUsuario().setMillas(self.getUsuario().getMillas()+500)
         self.__reserva.estadoCheckIn = True
 
     def addMaletaBodega(self, maleta):
         self.__cantMaletasBodega += 1
         self.__maletas.append(maleta)
-        if self.__cantMaletasBodega > self.__reserva.cantSillasPref:
-            self.__costoEquipaje += 40.000
+        if self.__cantMaletasBodega > self.__cantidadPasajeros:
+            self.__costoEquipaje += (maleta.peso * 5000)
 
     def addMaletaCabina(self, maleta):
         self.__cantMaletasCabina += 1
         self.__maletas.append(maleta)
-        if self.__cantMaletasCabina > self.__reserva.cantSillasPref:
-            self.__costoEquipaje += (maleta.peso * 5000)
+        if self.__cantMaletasCabina > self.__cantidadPasajeros:
+            self.__costoEquipaje += 40000
 
     def getCostoEquipaje(self):
         return self.__costoEquipaje
@@ -32,3 +32,6 @@ class CheckIn:
 
     def getMaletaCabina(self):
         return self.__cantMaletasCabina
+
+    def getUsuario(self):
+        return self.__reserva.getUsuario()

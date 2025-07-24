@@ -6,7 +6,9 @@ from Pasajero import Pasajero
 from Administrador import Administrador
 from Reserva import Reserva
 from Vuelo import Vuelo
-import uuid
+from MaletaBodega import MaletaBodega
+from MaletaCabina import MaletaCabina
+from CheckIn import CheckIn
 
 sistema = SistemaAerolinea()
 
@@ -405,7 +407,6 @@ def ventana_admin(Administrador):
 
 
 def ventana_user(usuario):
-
     ventana = tk.Toplevel()
     ventana.title("Ingreso usuario")
     ventana.geometry("600x500")
@@ -453,7 +454,7 @@ def ventana_user(usuario):
     scrollbar.pack(side="right", fill="y")
 
     vuelos_frame = scrollable_frame
-####YOOOO
+
     def mostrar_detalle(vuelo):
         ventana = tk.Toplevel()
         ventana.title("Reserva de Vuelo")
@@ -525,7 +526,7 @@ def ventana_user(usuario):
                 sillas_sin_descuento = pref - sillas_con_descuento
 
                 total_pagar = (sillas_con_descuento * precio_econo) + (sillas_sin_descuento * precio_pref) + (
-                            econ * precio_econo)
+                        econ * precio_econo)
 
                 # Actualizar total
                 entry_total.delete(0, tk.END)
@@ -556,7 +557,7 @@ def ventana_user(usuario):
                 messagebox.showerror("Error", "Por favor ingresa solo números.")
 
         def confirmar_reserva():
-            nonlocal reserva_temp
+            nonlocal reserva_temp, entradas_pasajeros
             if not reserva_temp:
                 messagebox.showerror("Error", "Primero calcula el total e ingresa los pasajeros.")
                 return
@@ -570,45 +571,20 @@ def ventana_user(usuario):
                     return
                 pasajeros.append(Pasajero(nombre, doc))
 
-            id_reserva = sistema.generar_id_unico()
-
-            nueva_reserva = Reserva(
-                id_reserva,
-                usuario,
-                vuelo,
-                reserva_temp.getCantSillasPref(),
-                reserva_temp.getCantSillasEcono(),
-                reserva_temp.getPrecioTotal(),
-                True
-            )
-
-            # Redimir millas y actualizar vuelo
-            usuario.redimirMillas(min(reserva_temp.getCantSillasPref(), usuario.getMillas() // 2000) * 2000)
-            vuelo.set_sillasPreDisp(vuelo.get_sillasPreDisp() - reserva_temp.getCantSillasPref())
-            vuelo.set_sillasEconoDisp(vuelo.get_sillasEconoDisp() - reserva_temp.getCantSillasEcono())
-
-            sistema.addReserva(nueva_reserva)
-            messagebox.showinfo("Reserva completada", f"Reserva ID: {id_reserva} creada con éxito.")
-            ventana.destroy()
-
-        # Botones
-        frame_botones = tk.Frame(ventana)
-        frame_botones.pack(pady=20)
-        tk.Button(frame_botones, text="Calcular Total", command=calcular_total_e_ingresar_pasajeros).pack(side="left",
-                                                                                                          padx=10)
-        tk.Button(frame_botones, text="Confirmar Reserva", command=confirmar_reserva).pack(side="right", padx=10)
+            pasajeros_temp = pasajeros  # Guardamos los pasajeros válidos
+            ventana_pago()  # Abrimos la ventana de pago
 
         def ventana_pago():
-            ventana = tk.Toplevel()
-            ventana.title("Pagos - Tarjeta")
-            ventana.geometry("400x450")
+            nonlocal ventana  # accedemos a la ventana principal para cerrarla luego
+            ventana_pago = tk.Toplevel()
+            ventana_pago.title("Pagos - Tarjeta")
+            ventana_pago.geometry("400x450")
 
             fuente = ("Helvetica", 10)
 
-            tk.Label(ventana, text="Pagos - Tarjeta", font=("Helvetica", 18, "bold")).pack(pady=20)
+            tk.Label(ventana_pago, text="Pagos - Tarjeta", font=("Helvetica", 18, "bold")).pack(pady=20)
 
-
-            frame = tk.Frame(ventana)
+            frame = tk.Frame(ventana_pago)
             frame.pack(pady=10)
 
             tk.Label(frame, text="Nombre del titular", font=fuente, anchor="w").pack(fill="x")
@@ -638,29 +614,45 @@ def ventana_user(usuario):
                         messagebox.showerror("Error", "Por favor completa todos los campos.")
                         return
 
-                    int_id = int(id_usuario)
-                    int_cvv = int(cvv)
-                    int_tarjeta = int(tarjeta)
-
+                    int(id_usuario)
+                    int(tarjeta)
+                    int(cvv)
 
                 except ValueError:
-                    messagebox.showerror("Error", "El ID, el cvv y el numero de tajerta deben ser números enteros.")
+                    messagebox.showerror("Error", "El ID, el cvv y el número de tarjeta deben ser números enteros.")
                     return
 
-                messagebox.showinfo("Pago", "Pago realizado con éxito.")
-                # id_reserva = generar_id_reserva()
-                # precio = reserva_temp.calcularPrecio()
-                # nueva_reserva = Reserva(id_reserva, usuario, vuelo, reserva_temp.getSillasPref(),reserva_temp.getSillasEcono(), precio, False)
+                # CREAR RESERVA AHORA
+                id_reserva = sistema.generar_id_unico()
+                nueva_reserva = Reserva(
+                    id_reserva,
+                    usuario,
+                    vuelo,
+                    reserva_temp.getCantSillasPref(),
+                    reserva_temp.getCantSillasEcono(),
+                    reserva_temp.getPrecioTotal(),
+                    True
+                )
 
-                ventana.destroy()
+                usuario.redimirMillas(min(reserva_temp.getCantSillasPref(), usuario.getMillas() // 2000) * 2000)
+                vuelo.set_sillasPreDisp(vuelo.get_sillasPreDisp() - reserva_temp.getCantSillasPref())
+                vuelo.set_sillasEconoDisp(vuelo.get_sillasEconoDisp() - reserva_temp.getCantSillasEcono())
+                sistema.addReserva(nueva_reserva)
+                usuario.addReserva(nueva_reserva)
 
-            tk.Button(ventana, text="Pagar", command=pagar, bg="black", fg="white", width=15).pack(pady=20)
+                messagebox.showinfo("Reserva completada", f"Reserva ID: {id_reserva} creada con éxito.")
+
+                ventana_pago.destroy()  # cerrar ventana de pago
+                ventana.destroy()  # cerrar la ventana principal
+
+            tk.Button(ventana_pago, text="Pagar", command=pagar, bg="black", fg="white", width=15).pack(pady=20)
 
         frame_botones = tk.Frame(ventana)
         frame_botones.pack(pady=20)
 
-        #tk.Button(frame_botones, text="Total", command=calcular_total_e_ingresar_pasajeros(), width=10).pack(side="left", padx=10)
-        #tk.Button(frame_botones, text="Reservar", command=ventana_pago, width=10).pack(side="left", padx=10)
+        tk.Button(frame_botones, text="Total", command=calcular_total_e_ingresar_pasajeros, width=10).pack(side="left",
+                                                                                                           padx=10)
+        tk.Button(frame_botones, text="Reservar", command=confirmar_reserva, width=10).pack(side="left", padx=10)
 
     def buscar_vuelos():
         for widget in vuelos_frame.winfo_children():
@@ -885,10 +877,187 @@ def CHECKIN():
                     reserva_encontrada = reserva
                     break
 
-            if reserva_encontrada:
-                mensaje_label.config(text=f"Reserva {numero_reserva} encontrada para el usuario {id_usuario}",
-                                     fg="green")
-            # ventana reserva
+            if reserva_encontrada is not None:
+                mensaje_label.config(
+                    text=f"Reserva {numero_reserva} encontrada para el usuario {id_usuario}", fg="green")
+
+                # Crear objeto CheckIn
+                checkin = CheckIn(reserva_encontrada)
+
+                # Ventana de Check-In
+                ventanaCheckIn = tk.Toplevel()
+                ventanaCheckIn.title("Check-In")
+                ventanaCheckIn.geometry("600x500")
+
+                # Encabezados
+                tk.Label(ventanaCheckIn, text="Check-In", font=("Helvetica", 16, "bold")).pack(pady=5)
+                tk.Label(ventanaCheckIn, text=f"CÓDIGO DE RESERVA: {reserva_encontrada.getIdReserva()}",
+                         font=("Helvetica", 10)).pack(pady=2)
+                tk.Label(ventanaCheckIn,
+                         text=f"CÓDIGO VUELO: {reserva_encontrada.getVuelo().get_idVuelo()} - ORIGEN: {reserva_encontrada.getVuelo().get_origen()} - DESTINO: {reserva_encontrada.getVuelo().get_destino()} - HORARIO: {reserva_encontrada.getVuelo().get_horario()}",
+                         font=("Helvetica", 9)).pack(pady=5)
+                tk.Label(ventanaCheckIn,
+                         text="SE PERMITE EQUIPAJE DE MANO DE HASTA 10KG (UNO POR PASAJERO) INCLUIDO EN EL COSTO DE LA SILLA",
+                         font=("Helvetica", 9), wraplength=500, justify="center").pack(pady=10)
+
+                frame_cabina = tk.Frame(ventanaCheckIn)
+                frame_cabina.pack(pady=10)
+
+                tk.Label(frame_cabina, text="Añadir equipaje de cabina:", font=("Helvetica", 10)).pack(side="left")
+                spin_cabina = tk.Spinbox(frame_cabina, from_=0, to=5, width=5)
+                spin_cabina.pack(side="left", padx=10)
+
+                tk.Label(frame_cabina, text="Añadir equipaje de bodega:", font=("Helvetica", 10)).pack(side="left")
+                spin_bodega = tk.Spinbox(frame_cabina, from_=0, to=5, width=5)
+                spin_bodega.pack(side="left", padx=15)
+
+                # Función para añadir equipaje de cabina
+                def addEquipajeCabina():
+                    cantidad = int(spin_cabina.get())
+                    for i in range(cantidad):
+                        ventana = tk.Toplevel()
+                        ventana.title(f"Equipaje de Cabina {i + 1}")
+                        ventana.geometry("300x150")
+
+                        tk.Label(ventana, text="Ingresa el peso de tu equipaje de Cabina", font=("Helvetica", 10)).grid(
+                            row=0, column=0, columnspan=2, pady=5)
+                        tk.Label(ventana, text="Peso (kg):").grid(row=1, column=0, padx=5, sticky="e")
+
+                        entrada_peso = tk.Entry(ventana)
+                        entrada_peso.grid(row=1, column=1, padx=5, sticky="w")
+
+                        mensaje_error = tk.Label(ventana, text="", fg="red")
+                        mensaje_error.grid(row=2, column=0, columnspan=2)
+
+                        def crear_guardar(entrada, ventana_local, error_label):
+                            def guardar():
+                                try:
+                                    peso = float(entrada.get())
+                                    maleta = MaletaCabina(peso)
+                                    checkin.addMaletaCabina(maleta)
+                                    ventana_local.destroy()
+                                except ValueError:
+                                    error_label.config(text="El peso debe ser numérico.")
+                                except Exception as e:
+                                    error_label.config(text=f"Error: {str(e)}")
+
+                            return guardar
+
+                        tk.Button(ventana, text="Guardar",
+                                  command=crear_guardar(entrada_peso, ventana, mensaje_error)).grid(
+                            row=3, column=0, columnspan=2, pady=10
+                        )
+
+                # Función para añadir equipaje de bodega
+                def addEquipajeBodega():
+                    cantidad = int(spin_bodega.get())
+                    for i in range(cantidad):
+                        ventana = tk.Toplevel()
+                        ventana.title(f"Equipaje de Bodega {i + 1}")
+                        ventana.geometry("300x150")
+
+                        tk.Label(ventana, text="Ingresa el peso de tu equipaje de Bodega", font=("Helvetica", 10)).grid(
+                            row=0, column=0, columnspan=2, pady=5)
+                        tk.Label(ventana, text="Peso (kg):").grid(row=1, column=0, padx=5, sticky="e")
+
+                        entrada_peso = tk.Entry(ventana)
+                        entrada_peso.grid(row=1, column=1, padx=5, sticky="w")
+
+                        mensaje_error = tk.Label(ventana, text="", fg="red")
+                        mensaje_error.grid(row=2, column=0, columnspan=2)
+
+                        def crear_guardar(entrada, ventana_local, error_label):
+                            def guardar():
+                                try:
+                                    peso = float(entrada.get())
+                                    maleta = MaletaBodega(peso)
+                                    checkin.addMaletaBodega(maleta)
+                                    ventana_local.destroy()
+                                except ValueError:
+                                    error_label.config(text="El peso debe ser numérico.")
+                                except Exception as e:
+                                    error_label.config(text=f"Error: {str(e)}")
+
+                            return guardar
+
+                        tk.Button(ventana, text="Guardar",
+                                  command=crear_guardar(entrada_peso, ventana, mensaje_error)).grid(
+                            row=3, column=0, columnspan=2, pady=10
+                        )
+
+                price = tk.Label(ventanaCheckIn,text="")
+                price.pack(padx=5, pady=5)
+                def calcularPrecio():
+                    precio=checkin.getCostoEquipaje()
+                    price.config(text=f"Total a pagar por equipaje: ${precio}")
+
+                def ventana_pago():
+                    ventana = tk.Toplevel()
+                    ventana.title("Pagos - Tarjeta")
+                    ventana.geometry("400x450")
+
+                    fuente = ("Helvetica", 10)
+
+                    tk.Label(ventana, text="Pagos - Tarjeta", font=("Helvetica", 18, "bold")).pack(pady=20)
+
+                    frame = tk.Frame(ventana)
+                    frame.pack(pady=10)
+
+                    tk.Label(frame, text="Nombre del titular", font=fuente, anchor="w").pack(fill="x")
+                    entry_nombre = tk.Entry(frame)
+                    entry_nombre.pack(fill="x", pady=5)
+
+                    tk.Label(frame, text="ID", font=fuente, anchor="w").pack(fill="x")
+                    entry_id = tk.Entry(frame)
+                    entry_id.pack(fill="x", pady=5)
+
+                    tk.Label(frame, text="Numero de tarjeta", font=fuente, anchor="w").pack(fill="x")
+                    entry_tarjeta = tk.Entry(frame)
+                    entry_tarjeta.pack(fill="x", pady=5)
+
+                    tk.Label(frame, text="Codigo de seguridad", font=fuente, anchor="w").pack(fill="x")
+                    entry_cvv = tk.Entry(frame, show="*")
+                    entry_cvv.pack(fill="x", pady=5)
+
+                    def pagar():
+                        try:
+                            nombre = entry_nombre.get().strip()
+                            id_usuario = entry_id.get().strip()
+                            tarjeta = entry_tarjeta.get().strip()
+                            cvv = entry_cvv.get().strip()
+
+                            if not nombre or not id_usuario or not tarjeta or not cvv:
+                                messagebox.showerror("Error", "Por favor completa todos los campos.")
+                                return
+
+                            int_id = int(id_usuario)
+                            int_cvv = int(cvv)
+                            int_tarjeta = int(tarjeta)
+
+
+                        except ValueError:
+                            messagebox.showerror("Error",
+                                                 "El ID, el cvv y el numero de tajerta deben ser números enteros.")
+                            return
+
+                        messagebox.showinfo("Pago", "Pago realizado con éxito.")
+                        # id_reserva = generar_id_reserva()
+                        # precio = reserva_temp.calcularPrecio()
+                        # nueva_reserva = Reserva(id_reserva, usuario, vuelo, reserva_temp.getSillasPref(),reserva_temp.getSillasEcono(), precio, False)
+
+                        ventana.destroy()
+                        ventanaCheckIn.destroy()
+
+                    tk.Button(ventana, text="Pagar", command=pagar, bg="black", fg="white", width=15).pack(pady=20)
+
+                # Botones
+                tk.Button(ventanaCheckIn, text="Añadir Cabina", command=addEquipajeCabina).pack(pady=2)
+                tk.Button(ventanaCheckIn, text="Añadir Bodega", command=addEquipajeBodega).pack(pady=7)
+                tk.Button(ventanaCheckIn, text="Calcula Precio", command=calcularPrecio).pack(pady=2)
+                tk.Button(ventanaCheckIn, text="Pagar", command=lambda: [checkin.procesar(), ventana_pago()]).pack(pady=2)
+
+
+
             else:
                 mensaje_label.config(text="No se encontró ninguna reserva con ese ID y número.", fg="red")
 
@@ -899,7 +1068,6 @@ def CHECKIN():
 
     tk.Button(check, text="Enviar", command=iniciarCheck).pack(pady=5)
     tk.Button(check, text="Volver al inicio", command=check.destroy).pack(pady=5)
-
 
 # Etiquetas
 label1 = tk.Label(win, text="Usuario nuevo")
