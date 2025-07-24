@@ -4,19 +4,22 @@ from tkinter import messagebox, ttk
 from Usuario import Usuario
 from Administrador import Administrador
 
+sistema = SistemaAerolinea()
+
 user1 = Usuario("Ana", 123, "pass1", "ana@gmail.com")
 user2 = Usuario("Juan", 122, "pass2", "juan@gmail.com")
 user3 = Usuario("Jose", 1234567, "pass", "jose@gmail.com")
 user4 = Usuario("Miguel", 51813066, "pass", "miguel@gmail.com")
 user5 = Usuario("Manuel", 211, "pass", "manuel@gmail.com")
 
-sistema = SistemaAerolinea()
-
 sistema.registrarUsuario(user1)
 sistema.registrarUsuario(user2)
 sistema.registrarUsuario(user3)
 sistema.registrarUsuario(user4)
 sistema.registrarUsuario(user5)
+
+for u in sistema._SistemaAerolinea__usuarios:
+    print(u.getNombre(), u.getIdUsuario())
 
 sistema.importarVuelos("vuelos.txt")
 
@@ -123,7 +126,7 @@ def ventana_user(usuario):
     ventana.title("Ingreso usuario")
     ventana.geometry("600x500")
 
-    tk.Label(ventana, text=f"Bienvenido/a {usuario.nombre}", font=("Helvetica", 12)).pack(pady=10)
+    tk.Label(ventana, text=f"Bienvenido/a {usuario.getNombre}", font=("Helvetica", 12)).pack(pady=10)
 
     # Marco horizontal para millas
     frame_millas = tk.Frame(ventana)

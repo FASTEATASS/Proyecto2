@@ -1,68 +1,66 @@
 from Maleta import Maleta
 from CheckIn import CheckIn
+
 class Usuario:
     def __init__(self, nombre, idUsuario, contraseña, correoElectronico):
-        self.nombre = nombre
-        self.idUsuario = idUsuario
-        self.contraseña = contraseña
-        self.correoElectronico = correoElectronico
-        self.millas = 0
-        self.reservas = []
+        self._nombre = nombre
+        self._idUsuario = idUsuario
+        self._contraseña = contraseña
+        self._correoElectronico = correoElectronico
+        self.__millas = 0
+        self._reservas = []
 
     def addReserva(self, idReserva):
-        self.reservas.append(idReserva)
+        self._reservas.append(idReserva)
 
     def getNombre(self):
-        return self.nombre
+        return self._nombre
 
     def getIdUsuario(self):
-        return self.idUsuario
+        return self._idUsuario
 
     def getMillas(self):
-        return self.millas
+        return self.__millas
 
     def getCorreo(self):
-        return self.correoElectronico
+        return self._correoElectronico
 
     def getReservas(self):
-        return self.reservas
+        return self._reservas
 
     def setContraseña(self, contraseña):
-        self.contraseña = contraseña
+        self._contraseña = contraseña
 
     def setMillas(self, millas):
-        self.millas = millas
+        self.__millas = millas
 
     def actualizarMillas(self, millasASumar):
-        self.millas += millasASumar
-        return self.millas
+        self.__millas += millasASumar
+        return self.__millas
 
     def redimirMillas(self, millasARedimir):
-        if self.millas >= 2000 and millasARedimir >= 2000:
+        if self.__millas >= 2000 and millasARedimir >= 2000:
             cantidadSillas = millasARedimir // 2000
-            self.millas -= (millasARedimir // 2000)
+            self.__millas -= (millasARedimir // 2000)
             return cantidadSillas
         else:
             return "Las millas son insuficientes"
 
     def validarCredenciales(self, idUsuario, contraseña):
-        if self.idUsuario == idUsuario and self.contraseña == contraseña:
-            return True
-        else:
-            return False
+        return self._idUsuario == idUsuario and self._contraseña == contraseña
 
     def verificarReserva(self, id):
-        for i in range(len(self.reservas)):
-            if (self.reservas[i].get_idReserva() == id):
+        for i in range(len(self._reservas)):
+            if self._reservas[i].get_idReserva() == id:
                 return i
         return -1
 
     def cancelarReserva(self, idReserva):
-        inx = self.reservas(idReserva)
+        inx = self.verificarReserva(idReserva)
         if inx == -1:
             return False
         else:
-            self.reservas.pop(inx)
+            self._reservas.pop(inx)
             return True
 
     def modificarReserva(self, reserva):
@@ -71,12 +69,12 @@ class Usuario:
         if inx == -1:
             return False
         else:
-            self.reservas[inx] = reserva
+            self._reservas[inx] = reserva
             return True
 
     def checkIn(self, idUsuario, ReservaCod, maletas_pesos):
-        for reserva in self.reservas:
-            if reserva.get_idReserva() == ReservaCod and self.idUsuario == idUsuario:
+        for reserva in self._reservas:
+            if reserva.get_idReserva() == ReservaCod and self._idUsuario == idUsuario:
                 if hasattr(reserva, 'checkInRealizado') and reserva.checkInRealizado:
                     print("Ya se ha realizado el check-in para esta reserva.")
                     return False
@@ -87,7 +85,7 @@ class Usuario:
 
                 reserva.checkInRealizado = True
 
-                print("Check in realizado con éxitos")
+                print("Check in realizado con éxito")
                 print(f"Millas totales: {checkin.getMillas()}")
                 print(f"Costo total por equipaje: ${checkin.getCostoEquipaje()}")
                 return True
