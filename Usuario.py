@@ -10,6 +10,9 @@ class Usuario:
         self.__millas = 0
         self._reservas = []
 
+    def getContraseña(self):
+        return self._contraseña
+
     def addReserva(self, idReserva):
         self._reservas.append(idReserva)
 

@@ -13,7 +13,36 @@ class SistemaAerolinea:
         self.__reservas = []
         self.__no_usuarios = None
 
-    def
+    def verificarVuelo(self, codigo):
+        for i, vuelo in enumerate(self.__vuelos):
+            if vuelo.get_idVuelo() == codigo:
+                return i
+        return -1
+
+    def crearVuelo(self, codigo, origen, destino, horario, sillasPremium, sillasEcono):
+        if self.verificarVuelo(codigo) != -1:
+            return False
+        nuevo_vuelo = Vuelo(codigo, origen, destino, horario, sillasPremium, sillasEcono)
+        self.__vuelos.append(nuevo_vuelo)
+        return True
+
+    def modificarVuelo(self, codigo, nuevo_origen=None, nuevo_destino=None, nuevo_horario=None,
+                       nuevas_sillasPremium=None, nuevas_sillasEcono=None):
+        inx = self.verificarVuelo(codigo)
+        if inx == -1:
+            return False
+
+        vuelo = self.__vuelos[inx]
+        if nuevo_origen: vuelo.set_origen(nuevo_origen)
+        if nuevo_destino: vuelo.set_destino(nuevo_destino)
+        if nuevo_horario: vuelo.set_horario(nuevo_horario)
+        if nuevas_sillasPremium is not None: vuelo.set_sillasPreDisp(nuevas_sillasPremium)
+        if nuevas_sillasEcono is not None: vuelo.set_sillasEconoDisp(nuevas_sillasEcono)
+        return True
+
+    def addReserva(self, Reserva):
+        self.__reservas.append(Reserva)
+
     def getVuelos(self):
         return self.__vuelos
 
@@ -59,10 +88,10 @@ class SistemaAerolinea:
         try:
             with open(filename, 'w', encoding='utf-8') as file:
                 for reserva in self.__reservas:
-                    pasajeros_str = "|".join(
-                        [f"{p.getNombre()},{p.getId()}" for p in reserva.getPasajeros()]
+                    # Formato: "Nombre|ID,Nombre2|ID2"
+                    pasajeros_str = ",".join(
+                        [f"{p.getNombre()}|{p.getId()}" for p in reserva.getPasajeros()]
                     )
-
                     linea = (
                         f"{reserva.getIdReserva()},"
                         f"{reserva.getUsuario().getIdUsuario()},"
@@ -72,11 +101,12 @@ class SistemaAerolinea:
                         f"{pasajeros_str},"
                         f"{reserva.getEstadoCheckIn()},"
                         f"{reserva.getPrecioTotal()},"
-                        f"{reserva.getMillasRedimidas()}"
+                        f"{reserva.getMillasRedimidas()}\n"
                     )
-                    file.write(linea + '\n')
+                    file.write(linea)
             return True
         except Exception as e:
+            print(f"Error al guardar: {str(e)}")
             return False
 
     def importarReservas(self, filename):
@@ -87,46 +117,62 @@ class SistemaAerolinea:
                     datos = linea.strip().split(',')
                     if len(datos) < 9:
                         continue
+
                     try:
-                        id_reserva = datos[0]
-                        id_usuario = datos[1]
-                        id_vuelo = datos[2]
-                        usuario = next((u for u in self.__usuarios if u.getIdUsuario() == id_usuario), None)
-                        vuelo = next((v for v in self.__vuelos if v.get_idVuelo() == id_vuelo), None)
+                        # Buscar usuario y vuelo
+                        usuario = next((u for u in self.__usuarios if u.getIdUsuario() == datos[1]), None)
+                        vuelo = next((v for v in self.__vuelos if v.get_idVuelo() == datos[2]), None)
+                        if not usuario or not vuelo:
+                            continue
+
+                        # Crear reserva
                         reserva = Reserva(
-                            id_reserva, usuario, vuelo,
-                            int(datos[3]), int(datos[4]),
-                            float(datos[7]), datos[8].lower() == 'true'
+                            datos[0], usuario, vuelo,
+                            int(datos[3]), int(datos[4]),  # sillas_pref, sillas_econo
+                            float(datos[7]),  # precio_total
+                            datos[8].lower() == 'true'  # millas_redimidas
                         )
                         reserva.setEstadoCheckIn(datos[6].lower() == 'true')
+
+                        # Añadir pasajeros (formato: "Nombre|ID,Nombre2|ID2")
                         if datos[5]:
                             for p_str in datos[5].split(','):
-                                if '|' in p_str:
-                                    nombre, id_p = p_str.split('|')
-                                    reserva.addPasajero(Pasajero(nombre.strip(), id_p.strip()))
+                                nombre, id_p = p_str.split('|')
+                                reserva.addPasajero(Pasajero(nombre.strip(), id_p.strip()))
+
                         nuevas_reservas.append(reserva)
-                    except Exception as e:
+
+                    except (ValueError, AttributeError) as e:
+                        print(f"Error en línea: {linea} - {str(e)}")
                         continue
+
             self.__reservas = nuevas_reservas
             return True
+        except FileNotFoundError:
+            print(f"Archivo no encontrado: {filename}")
+            return False
         except Exception as e:
+            print(f"Error inesperado: {str(e)}")
             return False
 
-    def tofileusuarios(self, filename):
+    def toFileUsuarios(self, filename):
         try:
             with open(filename, 'w', encoding='utf-8') as file:
                 for u in self.__usuarios:
-                    reservasStr = '|'.join([r.getIdReserva() for r in u.getReservas()])
-                    linea = (f"{u.getNombre()},"
-                             f"{u.getIdUsuario()},"
-                             f"{u.getContraseña()},"
-                             f"{u.getCorreoElectronico()},"
-                             f"{u.getMillas()},"
-                             f"{reservasStr}"
-                             )
+                    reservas = u.getReservas()
+                    reservasStr = '|'.join([r.getIdReserva() for r in reservas]) if reservas else ""
+
+                    linea = (
+                        f"{u.getNombre()},"
+                        f"{u.getIdUsuario()},"
+                        f"{u.getContraseña()},"
+                        f"{u.getCorreo()},"
+                        f"{u.getMillas()},"
+                        f"{reservasStr}"
+                    )
                     file.write(linea + '\n')
             return True
-        except Exception:
+        except Exception as e:
             return False
 
     def importarUsuarios(self, filename):
@@ -176,6 +222,40 @@ class SistemaAerolinea:
             self.__vuelos = vuelos
             return True
         except Exception as e:
+            return False
+
+    def toFileVuelos(self, filename):
+        """
+        Guarda los vuelos en formato compatible con importarVuelos:
+        idVuelo\torigen\tdestino\tdia\thora\tsillasPref\tsillasEcono
+
+        Args:
+            filename (str): Ruta del archivo de salida
+
+        Returns:
+            bool: True si se guardó correctamente, False si hubo error
+        """
+        try:
+            with open(filename, 'w', encoding='utf-8') as file:
+                for vuelo in self.__vuelos:
+                    # Separar día y hora del horario
+                    horario = vuelo.get_horario().split(' ', 1)
+                    dia = horario[0] if len(horario) > 0 else ""
+                    hora = horario[1] if len(horario) > 1 else ""
+
+                    linea = (
+                        f"{vuelo.get_idVuelo()}\t"
+                        f"{vuelo.get_origen()}\t"
+                        f"{vuelo.get_destino()}\t"
+                        f"{dia}\t"
+                        f"{hora}\t"
+                        f"{vuelo.get_sillasPreDisp()}\t"
+                        f"{vuelo.get_sillasEconoDisp()}\n"
+                    )
+                    file.write(linea)
+            return True
+        except Exception as e:
+            print(f"Error al guardar vuelos: {str(e)}")
             return False
 
     def importarCheckins(self, filename):

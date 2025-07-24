@@ -69,9 +69,15 @@ reserva4 = Reserva(
 reserva4.addPasajero(Pasajero("Daniela Vargas", "DV567"))
 reserva4.addPasajero(Pasajero("Andrés Gómez", "AG890"))
 reserva4.setEstadoCheckIn(True)  # Check-in realizado
+sistema.addReserva(reserva1)
+sistema.addReserva(reserva2)
+sistema.addReserva(reserva3)
+sistema.addReserva(reserva4)
+
+sistema.toFileReservas("reservas.txt")
 ######PRUEBAS
 
-sistema.
+
 
 sistema.registrarUsuario(user1)
 sistema.registrarUsuario(user2)
@@ -80,9 +86,13 @@ sistema.registrarUsuario(user4)
 sistema.registrarUsuario(user5)
 
 sistema.importarVuelos("vuelos.txt")
+sistema.toFileVuelos("vuelos2.txt")
 
 for u in sistema._SistemaAerolinea__usuarios:
     print(u.getNombre(), u.getIdUsuario())
+
+for r in sistema._SistemaAerolinea__reservas:
+    print(r.getIdReserva() , r.getEstadoCheckIn())
 
 # Crear la ventana principal
 win = tk.Tk()
