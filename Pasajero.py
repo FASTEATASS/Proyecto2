@@ -14,6 +14,6 @@ class Pasajero:
 
     def setId(self, nueva_id):
         self.__id = nueva_id
-        
+
     def toString(self):
         return f'Nombre:{self.__nombre}. Id: {self.__id}'

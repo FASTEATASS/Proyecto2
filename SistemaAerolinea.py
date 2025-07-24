@@ -89,7 +89,7 @@ class SistemaAerolinea:
                         p = Pasajero()
                         p.setNombre(datosPasajero[0])
                         p.setId(datosPasajero[1])
-                        pasajerosReserva.appendend(p)
+                        pasajerosReserva.append(p)
 
                     estadoCheckin = datos[6].lower() == 'true'
                     precioTotal = float(datos[7])

@@ -11,16 +11,16 @@ class Reserva:
         self.__millasRedimidas = millasRedimidas
 
     def calcularPrecio(self):
-        self._precioTotal = (self.cantSillasPref * 850000) + (self._cantSillasEcono * 235000)
+        self.__precioTotal = (self.__cantSillasPref * 850000) + (self.__cantSillasEcono * 235000)
         return self.__precioTotal
 
     def pagarReserva(self):
-        if self._millasRedimidas and self._usuario.millas > 2000:
+        if self.__millasRedimidas and self.__usuario.millas > 2000:
             sillasARedimir = self.__usuario.millas // 2000
             if sillasARedimir <= self.__cantSillasPref:
                 self.__precioTotal -= (sillasARedimir * 615000)
             else:
-                self._precioTotal -= (self._cantSillasPref * 615000)
+                self.__precioTotal -= (self.__cantSillasPref * 615000)
 
         return True
 
