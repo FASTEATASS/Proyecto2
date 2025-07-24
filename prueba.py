@@ -139,14 +139,8 @@ def ventana_user(usuario):
     origenes = sorted(list(set(v.get_origen() for v in vuelos_disponibles)))
     destinos = sorted(list(set(v.get_destino() for v in vuelos_disponibles)))
 
-    ##origenes = set(v.get_origen() for v in vuelos_disponibles)
-    ##destinos = set(v.get_destino() for v in vuelos_disponibles)
-
     origen_var = tk.StringVar()
     destino_var = tk.StringVar()
-
-    ##vuelos_disponibles = sistema.buscarVuelo(origen_var, destino_var)
-
 
     tk.Label(ventana, text="Origen:").pack()
     combo_origen = ttk.Combobox(ventana, textvariable=origen_var, values=origenes, state="readonly")
@@ -156,17 +150,38 @@ def ventana_user(usuario):
     combo_destino = ttk.Combobox(ventana, textvariable=destino_var, values=destinos, state="readonly")
     combo_destino.pack()
 
-    vuelos_frame = tk.Frame(ventana)
-    vuelos_frame.pack(pady=15)
+    # vuelos_frame = tk.Frame(ventana)
+    # vuelos_frame.pack(pady=15)
+
+    canvas = tk.Canvas(ventana, height=200)  # Puedes ajustar la altura aquí
+    scrollbar = tk.Scrollbar(ventana, orient="vertical", command=canvas.yview)
+    scrollable_frame = tk.Frame(canvas)
+
+    scrollable_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(
+            scrollregion=canvas.bbox("all")
+        )
+    )
+
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    canvas.pack(side="left", fill="both", expand=True, padx=(10, 0))
+    scrollbar.pack(side="right", fill="y")
+
+    vuelos_frame = scrollable_frame
 
     def mostrar_detalle(vuelo):
+        ventana_detalle = tk.Toplevel()
+        ventana_detalle.title("Detalle del vuelo")
         info = (
             f"Código: {vuelo.get_idVuelo()}\n"
             f"Origen: {vuelo.get_origen()}\n"
             f"Destino: {vuelo.get_destino()}\n"
             f"Horario: {vuelo.get_horario()}"
         )
-        messagebox.showinfo("Información del vuelo", info)
+        tk.Label(ventana_detalle, text=info, justify="left", font=("Helvetica", 12)).pack(padx=15, pady=10)
 
     def buscar_vuelos():
         for widget in vuelos_frame.winfo_children():
@@ -179,7 +194,9 @@ def ventana_user(usuario):
             tk.Label(vuelos_frame, text="Por favor selecciona origen y destino.").pack()
             return
 
-        encontrados = [v for v in vuelos_disponibles if v.get_origen() == origen and v.get_destino() == destino]
+        encontrados = [v for v in vuelos_disponibles
+                       if v.get_origen().strip().lower() == origen.strip().lower()
+                       and v.get_destino().strip().lower() == destino.strip().lower()]
 
         if not encontrados:
             tk.Label(vuelos_frame, text="No hay vuelos disponibles para esa ruta.").pack()
@@ -190,17 +207,11 @@ def ventana_user(usuario):
             fila.pack(pady=5, fill="x")
 
             desc = f"Vuelo {vuelo.get_idVuelo()}: {vuelo.get_origen()} → {vuelo.get_destino()} | Horario: {vuelo.get_horario()}"
-            ##desc = f"Vuelo {vuelo.get_idVuelo()}: {vuelo.get_origen()} → {vuelo.get_destino()}"
 
-            ##desc = f"Vuelo {vuelo.codigo}: {vuelo.origen} → {vuelo.destino} "
             tk.Label(fila, text=desc, anchor="w").pack(side="left", padx=5)
 
             boton_reserva = tk.Button(fila, text="Reservar", command=lambda v=vuelo: mostrar_detalle(v))
             boton_reserva.pack(side="right", padx=5)
-            ##boton_comprar = tk.Button(fila, text="Comprar", command=lambda v=vuelo: mostrar_detalle(v))
-            ##boton_comprar.pack(side="right", padx=5)
-
-    tk.Button(ventana, text="Buscar vuelos", command=buscar_vuelos).pack(pady=10)
 
     def consultar_reservas():
 
