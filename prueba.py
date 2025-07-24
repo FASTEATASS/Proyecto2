@@ -136,13 +136,16 @@ def ventana_user(usuario):
     tk.Label(frame_millas, text=f"Cantidad de millas acumuladas: {usuario.getMillas()}", font=("Helvetica", 10)).pack(
         side=tk.LEFT, padx=10)
 
-    origenes = set(v.get_origen() for v in vuelos_disponibles)
-    destinos = set(v.get_destino() for v in vuelos_disponibles)
+    origenes = sorted(list(set(v.get_origen() for v in vuelos_disponibles)))
+    destinos = sorted(list(set(v.get_destino() for v in vuelos_disponibles)))
+
+    ##origenes = set(v.get_origen() for v in vuelos_disponibles)
+    ##destinos = set(v.get_destino() for v in vuelos_disponibles)
 
     origen_var = tk.StringVar()
     destino_var = tk.StringVar()
 
-    vuelos_disponibles = sistema.buscarVuelo(origen_var, destino_var)
+    ##vuelos_disponibles = sistema.buscarVuelo(origen_var, destino_var)
 
 
     tk.Label(ventana, text="Origen:").pack()
