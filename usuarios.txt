@@ -1,0 +1,5 @@
+Ana,123,pass1,ana@gmail.com,0,
+Juan,122,pass2,juan@gmail.com,0,
+Jose,1234567,pass,jose@gmail.com,0,
+Miguel,51813066,pass,miguel@gmail.com,0,
+Manuel,211,pass,manuel@gmail.com,0,

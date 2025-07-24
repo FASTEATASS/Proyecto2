@@ -156,51 +156,81 @@ class SistemaAerolinea:
             return False
 
     def toFileUsuarios(self, filename):
+        """
+        Guarda usuarios en formato:
+        nombre,id,contraseña,correo,millas[,reservas]
+        """
         try:
             with open(filename, 'w', encoding='utf-8') as file:
                 for u in self.__usuarios:
+                    # Obtener IDs de reservas (maneja caso cuando getReservas() retorna strings u objetos)
                     reservas = u.getReservas()
-                    reservasStr = '|'.join([r.getIdReserva() for r in reservas]) if reservas else ""
+                    reservas_str = ''
 
-                    linea = (
-                        f"{u.getNombre()},"
-                        f"{u.getIdUsuario()},"
-                        f"{u.getContraseña()},"
-                        f"{u.getCorreo()},"
-                        f"{u.getMillas()},"
-                        f"{reservasStr}"
-                    )
-                    file.write(linea + '\n')
+                    if reservas:
+                        if isinstance(reservas[0], str):  # Si son strings (IDs)
+                            reservas_str = '|'.join(reservas)
+                        else:  # Si son objetos Reserva
+                            reservas_str = '|'.join([r.getIdReserva() for r in reservas if hasattr(r, 'getIdReserva')])
+
+                    # Escribir línea (siempre incluye la coma final para reservas, aunque esté vacía)
+                    linea = f"{u.getNombre()},{u.getIdUsuario()},{u.getContraseña()},{u.getCorreo()},{u.getMillas()},{reservas_str}\n"
+                    file.write(linea)
+
+            print(f"✅ Usuarios guardados correctamente en {filename}")
             return True
         except Exception as e:
+            print(f"❌ Error al guardar usuarios: {e}")
             return False
 
     def importarUsuarios(self, filename):
+        """
+        Importa usuarios desde archivo con formato:
+        nombre,id,contraseña,correo,millas[,reservas]
+        """
         try:
             nuevos_usuarios = []
             with open(filename, 'r', encoding='utf-8') as file:
                 for linea in file:
-                    datos = linea.strip().split(',')
+                    # Dividir línea y limpiar elementos
+                    datos = [d.strip() for d in linea.strip().split(',')]
+
+                    # Validar campos mínimos (5 campos obligatorios)
                     if len(datos) < 5:
+                        print(f"⚠ Línea ignorada (faltan datos): {linea}")
                         continue
 
-                    nombre = datos[0]
-                    idUsuario = datos[1]
-                    contraseña = datos[2]
-                    correo = datos[3]
-                    millas = int(datos[4])
-                    reservas_ids = datos[5].split('|') if len(datos) == 6 and datos[5] else []
+                    # Procesar datos básicos
+                    try:
+                        usuario = Usuario(
+                            nombre=datos[0],
+                            idUsuario=int(datos[1]),
+                            contraseña=datos[2],
+                            correoElectronico=datos[3]
+                        )
+                        usuario.setMillas(int(datos[4]) if datos[4].isdigit() else 0)
 
-                    u = Usuario(nombre, idUsuario, contraseña, correo)
-                    u.setMillas(millas)
-                    for idReserva in reservas_ids:
-                        u.addReserva(idReserva)
+                        # Procesar reservas (campo opcional después de la 5ta coma)
+                        if len(datos) > 5 and datos[5]:
+                            for id_reserva in datos[5].split('|'):
+                                if id_reserva.strip():
+                                    usuario.addReserva(id_reserva.strip())
 
-                    nuevos_usuarios.append(u)
+                        nuevos_usuarios.append(usuario)
+
+                    except Exception as e:
+                        print(f"⚠ Error procesando línea '{linea}': {e}")
+                        continue
 
             self.__usuarios = nuevos_usuarios
+            print(f"✅ Se importaron {len(nuevos_usuarios)} usuarios de {filename}")
             return True
+
+        except FileNotFoundError:
+            print(f"❌ Archivo no encontrado: {filename}")
+            return False
         except Exception as e:
+            print(f"❌ Error crítico: {str(e)}")
             return False
 
     def importarVuelos(self, filename):

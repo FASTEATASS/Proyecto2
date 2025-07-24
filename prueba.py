@@ -10,11 +10,11 @@ from Pasajero import Pasajero
 
 sistema = SistemaAerolinea()
 
-user1 = Usuario("Ana", 123, "pass1", "ana@gmail.com")
-user2 = Usuario("Juan", 122, "pass2", "juan@gmail.com")
-user3 = Usuario("Jose", 1234567, "pass", "jose@gmail.com")
-user4 = Usuario("Miguel", 51813066, "pass", "miguel@gmail.com")
-user5 = Usuario("Manuel", 211, "pass", "manuel@gmail.com")
+##user1 = Usuario("Ana", 123, "pass1", "ana@gmail.com")
+##user2 = Usuario("Juan", 122, "pass2", "juan@gmail.com")
+##user3 = Usuario("Jose", 1234567, "pass", "jose@gmail.com")
+##user4 = Usuario("Miguel", 51813066, "pass", "miguel@gmail.com")
+##user5 = Usuario("Manuel", 211, "pass", "manuel@gmail.com")
 
 reserva1 = Reserva(
     idReserva="RES001",
@@ -79,14 +79,17 @@ sistema.toFileReservas("reservas.txt")
 
 
 
-sistema.registrarUsuario(user1)
-sistema.registrarUsuario(user2)
-sistema.registrarUsuario(user3)
-sistema.registrarUsuario(user4)
-sistema.registrarUsuario(user5)
+#sistema.registrarUsuario(user1)
+#sistema.registrarUsuario(user2)
+#sistema.registrarUsuario(user3)
+#sistema.registrarUsuario(user4)
+#sistema.registrarUsuario(user5)
 
 sistema.importarVuelos("vuelos.txt")
 sistema.toFileVuelos("vuelos2.txt")
+
+#sistema.toFileUsuarios("usuarios.txt")
+sistema.importarUsuarios("usuarios.txt")
 
 for u in sistema._SistemaAerolinea__usuarios:
     print(u.getNombre(), u.getIdUsuario())
