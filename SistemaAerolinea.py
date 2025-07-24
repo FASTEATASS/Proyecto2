@@ -172,10 +172,6 @@ class SistemaAerolinea:
 
     ##No tocar
     def toFileUsuarios(self, filename):
-        """
-        Guarda usuarios en formato:
-        nombre,id,contraseña,correo,millas[,reservas]
-        """
         try:
             with open(filename, 'w', encoding='utf-8') as file:
                 for u in self.__usuarios:
@@ -200,10 +196,6 @@ class SistemaAerolinea:
             return False
 ##No tocar
     def importarUsuarios(self, filename):
-        """
-        Importa usuarios desde archivo con formato:
-        nombre,id,contraseña,correo,millas[,reservas]
-        """
         try:
             nuevos_usuarios = []
             with open(filename, 'r', encoding='utf-8') as file:
@@ -272,16 +264,6 @@ class SistemaAerolinea:
             return False
 ##No tocar
     def toFileVuelos(self, filename):
-        """
-        Guarda los vuelos en formato compatible con importarVuelos:
-        idVuelo\torigen\tdestino\tdia\thora\tsillasPref\tsillasEcono
-
-        Args:
-            filename (str): Ruta del archivo de salida
-
-        Returns:
-            bool: True si se guardó correctamente, False si hubo error
-        """
         try:
             with open(filename, 'w', encoding='utf-8') as file:
                 for vuelo in self.__vuelos:
