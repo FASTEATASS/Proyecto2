@@ -1,5 +1,5 @@
 class Reserva:
-    def _init_(self, idReserva, usuario, vuelo, cantSillasPref, cantSillasEcono, precioTotal, millasRedimidas):
+    def __init__(self, idReserva, usuario, vuelo, cantSillasPref, cantSillasEcono, precioTotal, millasRedimidas):
         self.__idReserva = idReserva
         self.__usuario = usuario
         self.__vuelos = vuelo

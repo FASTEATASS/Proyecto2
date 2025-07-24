@@ -4,14 +4,6 @@ from tkinter import messagebox, ttk
 from Usuario import Usuario
 from Administrador import Administrador
 
-class prueba:
-    sis = SistemaAerolinea()
-    sis.importarVuelos("vuelos.txt")
-    for vuelo in sis._SistemaAerolinea__vuelos:
-        print(
-            f"{vuelo.get_idVuelo()} - {vuelo.get_origen()} -> {vuelo.get_destino()}, {vuelo.get_horario()}, Pref: {vuelo.get_sillasPreDisp()}, Econo: {vuelo.get_sillasEconoDisp()}")
-
-
 user1 = Usuario("Ana", 123, "pass1", "ana@gmail.com")
 user2 = Usuario("Juan", 122, "pass2", "juan@gmail.com")
 user3 = Usuario("Jose", 1234567, "pass", "jose@gmail.com")
@@ -131,7 +123,7 @@ def ventana_user(usuario):
     ventana.title("Ingreso usuario")
     ventana.geometry("600x500")
 
-    tk.Label(ventana, text=f"Bienvenido/a {usuario._nombre}", font=("Helvetica", 12)).pack(pady=10)
+    tk.Label(ventana, text=f"Bienvenido/a {usuario.nombre}", font=("Helvetica", 12)).pack(pady=10)
 
     # Marco horizontal para millas
     frame_millas = tk.Frame(ventana)
@@ -140,12 +132,14 @@ def ventana_user(usuario):
     tk.Label(frame_millas, text=f"Cantidad de millas acumuladas: {usuario.getMillas()}", font=("Helvetica", 10)).pack(
         side=tk.LEFT, padx=10)
 
-    vuelos_disponibles = sistema.getVuelos()
-    origenes = sorted(set(v.origen for v in vuelos_disponibles))
-    destinos = sorted(set(v.destino for v in vuelos_disponibles))
+    origenes = set(v.get_origen for v in sistema._SistemaAerolinea__vuelos)
+    destinos = set(v.get_destino for v in sistema._SistemaAerolinea__vuelos)
 
     origen_var = tk.StringVar()
     destino_var = tk.StringVar()
+
+    vuelos_disponibles = sistema.buscarVuelo(origen_var, destino_var)
+
 
     tk.Label(ventana, text="Origen:").pack()
     combo_origen = ttk.Combobox(ventana, textvariable=origen_var, values=origenes, state="readonly")

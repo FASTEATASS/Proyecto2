@@ -1,4 +1,5 @@
 from Maleta import Maleta
+from CheckIn import CheckIn
 class Usuario:
     def __init__(self, nombre, idUsuario, contraseña, correoElectronico):
         self.nombre = nombre

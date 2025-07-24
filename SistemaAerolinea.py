@@ -44,7 +44,7 @@ class SistemaAerolinea:
     def buscarVuelo(self, origen, destino):
         v_filtrados = [
             vuelo for vuelo in self.__vuelos
-            if vuelo.get_origen() == origen.upper() and vuelo.get_destino() == destino.upper()
+            if vuelo.get_origen().upper() == origen.get().upper() and vuelo.get_destino().upper() == destino.get().upper()
         ]
         return v_filtrados
 
